@@ -58,13 +58,13 @@ RUN ARCH= && dpkgArch="$(dpkg --print-architecture)" \
     curl -sL https://deb.nodesource.com/setup_14.x | bash - \
     && apt-get install -y nodejs ; fi \
   && if [ "$ARCH" = "arm64" ]; then \
-    wget https://nodejs.org/dist/v14.5.0/node-v14.5.0-linux-arm64.tar.xz \
-    && tar -xvf node-v14.5.0-linux-arm64.tar.xz \
-    && cp -R node-v14.5.0-linux-arm64/* /usr/local/ ; fi \
+    wget https://nodejs.org/dist/v14.6.0/node-v14.6.0-linux-arm64.tar.xz \
+    && tar -xvf node-v14.6.0-linux-arm64.tar.xz \
+    && cp -R node-v14.6.0-linux-arm64/* /usr/local/ ; fi \
   && if [ "$ARCH" = "armv7l" ]; then \
-    wget https://nodejs.org/dist/v14.5.0/node-v14.5.0-linux-armv7l.tar.xz \
-    && tar -xvf node-v14.5.0-linux-armv7l.tar.xz \
-    && cp -R node-v14.5.0-linux-armv7l/* /usr/local/ ; fi
+    wget https://nodejs.org/dist/v14.6.0/node-v14.6.0-linux-armv7l.tar.xz \
+    && tar -xvf node-v14.6.0-linux-armv7l.tar.xz \
+    && cp -R node-v14.6.0-linux-armv7l/* /usr/local/ ; fi
 
 # Install Postgres 12 Client
 RUN wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - \
