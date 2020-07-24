@@ -1,0 +1,118 @@
+# docker_fhem_main
+FHEM in a Docker with some Add Ons I needed.
+
+A exaple docker-compose.yml:
+
+
+
+
+
+version: '3.8'
+
+services:
+  main:
+    restart: always
+    image: computerkoenig/fhem_main:latest
+    volumes:
+      - ./fhem_main/data:/opt/fhem
+      - ./fhem_main/log:/log
+      - ./fhem_main/backup:/backup
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    environment:
+      - "FHEM_PERM_DIR=0755"
+      - "FHEM_PERM_FILE=0644"
+      - "FHEM_UID=1000"
+      - "FHEM_GID=1000"
+      - "TZ=Europe/Berlin"
+      - "LOGFILE=/log/fhem-%Y-%m-%d.log"
+    ports:
+       #- "8883:8083" #PC Web + Dashboard + Mobile
+       - "7072:7072" #FHEM2FHEM
+       - "3030:3030" #Firmata Server Port
+       - "8090:8090" #AMAD Port
+    links:
+       #- mqtt_haproxy
+       - mqtt
+       - collectord
+
+  mqtt:
+     restart: always
+     image: eclipse-mosquitto:latest
+     volumes:
+       - ./mqtt/config:/mqtt/config:ro
+       - ./mqtt/log:/mqtt/log
+       - ./mqtt/data:/mqtt/data
+       - "/etc/timezone:/etc/timezone:ro"
+       - "/etc/localtime:/etc/localtime:ro"
+     ports:
+       - "1883:1883"
+       #- "9001:9001" #Web Port
+  
+  collectord:
+    restart: always
+    image: computerkoenig/fhem_collectord:latest
+    volumes:
+      - ./collectord/config:/etc/collectord:ro
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+  
+  alexa:
+    restart: always
+    image: computerkoenig/fhem_alexa:latest
+    volumes:
+      - ./alexa/config:/root/.alexa:ro
+      #- ./alexa/log:/log
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+      - "3000:3000"
+    links:
+      - main
+  
+  tasmoadmin:
+    restart: always
+    image: raymondmm/tasmoadmin:latest
+    volumes:
+      - ./tasmotaadmin/data:/data
+      - "/etc/timezone:/etc/timezone:ro"
+      - "/etc/localtime:/etc/localtime:ro"
+    ports:
+      - "8081:80"
+  
+  tasmocompiler:
+    restart: always
+    image: benzino77/tasmocompiler:latest
+    ports:
+      - "8082:3000"
+  
+  nginx_proxy:
+    restart: always
+    image: computerkoenig/ssl_reverseproxy:latest
+    environment:
+      - "NGINX_GID=1000"
+      - "NGINX_UID=1000"
+    volumes:
+      - ./nginx_proxy/config:/etc/nginx/conf.d:ro
+      - ./nginx_proxy/certfiles:/certfiles:ro
+      - ./nginx_proxy/log:/log
+      - ./fhem_main/data/www:/etc/nginx/html:ro
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "443:443"
+      - "80:80"
+      - "8083:8083"
+      - "8483:8483"
+    links:
+      - main
+
+  # mqtt_haproxy:
+  #    restart: always
+  #    image: haproxy
+  #    volumes:
+  #      - ./mqtt_haproxy/config:/usr/local/etc/haproxy:ro
+  #    ports:
+  #      - "1884:1883"
+  #      - "8071:80"
+  # 
